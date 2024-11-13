@@ -13,11 +13,11 @@ load_dotenv()
 migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
-
+app = Flask(__name__)
 from models import db
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    
     app.config.from_object(config_class)
 
     db.init_app(app)
