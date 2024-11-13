@@ -13,30 +13,30 @@ load_dotenv()
 migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
-app = Flask(__name__)
-from models import db
+db = SQLAlchemy()
 
 def create_app(config_class=Config):
-    
+    app = Flask(__name__)
     app.config.from_object(config_class)
 
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
-    CORS(app)
+
+    # Configure CORS to allow only your frontend origin
+    CORS(app, resources={r"/*": {"origins": "https://task-master-frontend-red.vercel.app"}}, supports_credentials=True)
 
     from auth import bp as auth
     from task import bp as routes
     app.register_blueprint(auth, url_prefix='/auth')
     app.register_blueprint(routes, url_prefix='/routes')
 
-    @app.route('/')  # Move this route inside the function
+    @app.route('/')
     def index():
         return "<h2>Hello, Flask is running!</h2>"
 
     return app
-
 
 if __name__ == '__main__':
     app = create_app()
