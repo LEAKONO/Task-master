@@ -6,17 +6,16 @@ from flask_cors import CORS
 from flask_mail import Mail
 from config import Config
 from dotenv import load_dotenv
-import os
 import logging
 
 # Load environment variables
 load_dotenv()
 
 # Initialize extensions without tying them to the app yet
+db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
-db = SQLAlchemy()
 
 def create_app(config_class=Config):
     # Create Flask application
