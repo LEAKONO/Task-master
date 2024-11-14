@@ -10,23 +10,25 @@ import os
 
 load_dotenv()
 
+# Initialize extensions, but don't tie them to app yet
 migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
-db = SQLAlchemy()
+db = SQLAlchemy()  # Don't pass app here
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # Now initialize the app with the extensions
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
 
-    # Configure CORS to allow only your frontend origin
     CORS(app)
 
+    # Register blueprints
     from auth import bp as auth
     from task import bp as routes
     app.register_blueprint(auth, url_prefix='/auth')
@@ -38,8 +40,8 @@ def create_app(config_class=Config):
 
     return app
 
+# Create the app instance
 app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
-
