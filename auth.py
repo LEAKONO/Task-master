@@ -8,26 +8,39 @@ from marshmallow import ValidationError
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 user_schema = UserSchema()
 
+import logging
+# Configure logging at the beginning of your file
+logging.basicConfig(level=logging.INFO)
+
 @bp.route('/signup', methods=['POST'])
 def signup():
     try:
         data = request.get_json()
+        logging.info("Received signup data: %s", data)
+        
+        # Validate and load user data
         user_data = user_schema.load(data)
 
+        # Check for existing user
         if User.query.filter_by(email=user_data['email']).first():
             return jsonify({"error": "Email already exists"}), 400
 
+        # Create a new user
         user = User(username=user_data['username'], email=user_data['email'])
         user.set_password(user_data['password'])
         db.session.add(user)
         db.session.commit()
 
+        logging.info("User created successfully")
         return jsonify({"message": "User created successfully"}), 201
 
     except ValidationError as err:
+        logging.error("Validation error: %s", err.messages)
         return jsonify({"errors": err.messages}), 400
     except Exception as e:
+        logging.error("Unhandled exception in signup: %s", str(e))
         return jsonify({"message": "Signup failed", "error": str(e)}), 500
+
 
 @bp.route('/login', methods=['POST'])
 def login():
