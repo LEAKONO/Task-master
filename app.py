@@ -25,7 +25,7 @@ def create_app(config_class=Config):
     mail.init_app(app)
 
     # Configure CORS to allow only your frontend origin
-    CORS(app, resources={r"/*": {"origins": "https://task-master-frontend-red.vercel.app"}}, supports_credentials=True)
+    CORS(app)
 
     from auth import bp as auth
     from task import bp as routes
