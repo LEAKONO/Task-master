@@ -7,26 +7,33 @@ from flask_mail import Mail
 from config import Config
 from dotenv import load_dotenv
 import os
+import logging
 
+# Load environment variables
 load_dotenv()
 
-# Initialize extensions, but don't tie them to app yet
+# Initialize extensions without tying them to the app yet
 migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
-db = SQLAlchemy()  # Don't pass app here
+db = SQLAlchemy()
 
 def create_app(config_class=Config):
+    # Create Flask application
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Now initialize the app with the extensions
+    # Initialize the app with each extension
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
-
     CORS(app)
+
+    # Set up logging for debugging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    logger.info("App initialized with config: %s", config_class)
 
     # Register blueprints
     from auth import bp as auth
@@ -37,6 +44,11 @@ def create_app(config_class=Config):
     @app.route('/')
     def index():
         return "<h2>Hello, Flask is running!</h2>"
+
+    # Create database tables if they don't exist
+    with app.app_context():
+        db.create_all()
+        logger.info("Database tables created or confirmed existing.")
 
     return app
 

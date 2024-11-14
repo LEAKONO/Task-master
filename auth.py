@@ -1,16 +1,17 @@
+# auth.py
 from flask import Blueprint, request, jsonify
 from app import db
 from models import User, TokenBlocklist
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 from schemas import UserSchema
 from marshmallow import ValidationError
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 user_schema = UserSchema()
-
-import logging
-# Configure logging at the beginning of your file
-logging.basicConfig(level=logging.INFO)
 
 @bp.route('/signup', methods=['POST'])
 def signup():
@@ -41,7 +42,6 @@ def signup():
         logging.error("Unhandled exception in signup: %s", str(e))
         return jsonify({"message": "Signup failed", "error": str(e)}), 500
 
-
 @bp.route('/login', methods=['POST'])
 def login():
     try:
@@ -58,6 +58,7 @@ def login():
         return jsonify({"access_token": access_token}), 200
 
     except Exception as e:
+        logging.error("Login error: %s", str(e))
         return jsonify({"message": "Login failed", "error": str(e)}), 500
 
 @bp.route('/logout', methods=['POST'])
